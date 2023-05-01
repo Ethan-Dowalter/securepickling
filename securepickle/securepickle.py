@@ -4,8 +4,13 @@ import hashlib
 import os
 
 def securedump(obj, file, SECRETKEY):
+    # Make sure file object is in correct mode
+    if (not ('b' in file.mode and 'w' in file.mode)):
+        file.close()
+        raise("Please make sure the file object passed to 'securedump' is in 'wb' mode!")
     # Make sure SECRETKEY is longer than minimum size of 32 bytes to ensure security
     if (len(SECRETKEY) < 64):
+        file.close()
         raise("Please use a key that is at least 64 bytes to ensure security!")
     # Get byte data of object
     bytedata = pickle.dumps(obj)
@@ -19,9 +24,17 @@ def securedump(obj, file, SECRETKEY):
     file.close()
 
 def secureload(file, SECRETKEY):
+    # Make sure file object is in correct mode
+    if (not ('b' in file.mode and 'r' in file.mode)):
+        file.close()
+        raise("Please make sure the file object passed to 'secureload' is in 'rb' mode!")
     # Get the length of the file in bytes to separate the 64-byte HMAC on the end
     file.seek(0, os.SEEK_END)
     filesize = file.tell()
+    # Error out if file is not longer than the 64-byte HMAC
+    if (filesize < 65):
+        file.close()
+        raise("Uh oh! Provided file was too small and the integrity of the pickle file could not be verified!")
     # Move the cursor back to the start
     file.seek(0)
     # Get the byte data by only reading to the last 64 bytes of the file

@@ -29,4 +29,3 @@ data = secureload(myfile2, SECRETKEY2)
 
 predictions = data.predict(X_test)
 print("Accuracy score:", sklearn.metrics.accuracy_score(y_test, predictions))
-#print(data)
